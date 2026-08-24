@@ -21,3 +21,16 @@ python benchmarks/medir_tiempos.py --algoritmo ordenamiento_burbuja --tamanos 10
 - Cada informe de laboratorio va en su propia subcarpeta dentro de `laboratorios/`, nombrada como `laboratorio-0X`.
 - Los scripts de `benchmarks/` no se duplican dentro de cada laboratorio: se importan o se referencian desde ahí.
 - Los mensajes de commit describen el cambio concreto realizado, evitando mensajes genéricos como "cambios" o "arreglos".
+
+
+##  Reproducción del Entorno Virtual
+
+Para recrear y activar el entorno virtual y las dependencias del proyecto desde la raíz del repositorio, se debe seguir estos pasos:
+
+1. **Crear el entorno virtual:**
+   ```bash
+   python3 -m venv venv
+
+   pip install -r requirements.txt
+
+   ---
