@@ -50,7 +50,7 @@ def ejecutar_pruebas() -> None:
             serie_aleatoria, 0, len(serie_aleatoria) - 1
         )[2]
         assert s_fb == s_dv, (
-            fiteración {i} con tamaño {tam}: FB dio {s_fb} y DV dio {s_dv}"
+            f"Iteración {i} con tamaño {tam}: FB dio {s_fb} y DV dio {s_dv}"
         )
 
     print("¡Todas las pruebas pasaron exitosamente!")
