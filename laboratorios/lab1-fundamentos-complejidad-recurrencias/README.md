@@ -1,36 +1,32 @@
 # Laboratorio 1 — Fundamentos, complejidad y recurrencias (plataforma Tamiza)
 
-**Estudiante:** Juliana Gómez Legarda
+**Estudiante:** Juliana Gómez Legarda cc 1001669134
 **Curso:** Análisis de Algoritmos
 
 ## Instrucciones para reproducir el experimento
 
 Los comandos se corren desde la raíz del repositorio (`curso-analisis-algoritmos/`).
 
-1. Activar el entorno virtual:
+0. Abrir la carpeta del repositorio en VS Code y abrir la terminal con `Ctrl + Ñ`. En Windows esa terminal es PowerShell y ya queda ubicada en la raíz del repositorio.
 
-   ```bash
-   # Windows (PowerShell o cmd)
+1. Activar el entorno virtual:
    venv\Scripts\activate
-   ```
+
 
 2. Instalar las dependencias, entre ellas `matplotlib`:
 
-   ```bash
    pip install -r requirements.txt
-   ```
+   
 
 3. Parte 3 (insertion sort sobre los tres escenarios). Se demora unos 15 segundos y deja `graficas/parte3_comparaciones.png` y `graficas/parte3_tiempo.png`:
 
-   ```bash
    python laboratorios/lab1-fundamentos-complejidad-recurrencias/parte3_casos.py
-   ```
+
 
 4. Parte 4 (insertion sort contra merge sort en el escenario A). También tarda unos 15 segundos y deja `graficas/parte4_tiempo.png`:
 
-   ```bash
+  
    python laboratorios/lab1-fundamentos-complejidad-recurrencias/parte4_complejidad.py
-   ```
 
 Cada script imprime en consola una tabla con lo que midió, y de ahí saqué las cifras de este informe. Como los datos aleatorios usan la semilla `42`, el número de comparaciones sale igual en cualquier computador; los tiempos sí van a variar según la máquina.
 
@@ -148,19 +144,22 @@ T(1) = Θ(1)
 Escribo Θ(n) como cn, con c > 0 constante, y supongo que n es potencia de 2 para que las divisiones den exactas. Cada nodo del árbol es una llamada, y lo que pongo en el nodo es lo que cuesta dividir y mezclar en esa llamada, sin contar a sus hijos:
 
 ```
-                                                        costo del nivel
-Nivel 0                        cn                        1  · cn        = cn
-                         /            \
-Nivel 1              c(n/2)          c(n/2)              2  · c(n/2)    = cn
-                    /     \          /     \
-Nivel 2         c(n/4)  c(n/4)   c(n/4)  c(n/4)          4  · c(n/4)    = cn
-                 / \     / \      / \     / \
-  ...            ...     ...      ...     ...               ...
-Nivel i       2^i nodos, cada uno de costo c(n/2^i)      2^i · c(n/2^i) = cn
-  ...
-Nivel log2(n)  c   c   c   c   c   ...   c   c           n  · c         = cn
-               (n hojas, una por elemento: T(1) = c)
+               cn
+            /      \
+        cn/2        cn/2
+        /  \        /  \
+     cn/4  cn/4  cn/4  cn/4
+      ...   ...   ...   ...
+     c  c  c  c  ...  c  c     <- n hojas
 ```
+
+| Nivel | Nodos | Costo de cada nodo | Costo del nivel |
+|---|---|---|---|
+| 0 | 1 | cn | cn |
+| 1 | 2 | cn/2 | cn |
+| 2 | 4 | cn/4 | cn |
+| i | 2^i | cn/2^i | cn |
+| log2 n | n | c | cn |
 
 Costo por nivel: en el nivel i hay 2^i nodos y cada uno trabaja con listas de tamaño n/2^i, entonces el nivel cuesta 2^i · c(n/2^i) = cn. Todos los niveles cuestan lo mismo: de un nivel al siguiente hay el doble de nodos, pero cada uno trabaja con la mitad.
 
@@ -178,41 +177,38 @@ Para comprobarlo usé el contador: con n = 6.400, n log2 n ~ 6.400 · 12,64 ~ 80
 
 #### Insertion sort, línea a línea
 
-Tomo la función `insertion_sort` de [algoritmos.py](algoritmos.py). Llamo t_i a las veces que se entra al `while` en la iteración i (que es lo mismo que el número de comparaciones entre elementos en esa iteración) y d_i a los desplazamientos, que son t_i o t_i − 1. Cada línea tiene un costo constante c_k.
-
-| Línea | Código | Costo | Veces que se ejecuta |
-|---:|---|---|---|
-| 23 | `arreglo = list(datos)` | c1 | 1 (pero copia n elementos: c1·n) |
-| 24 | `comparaciones = 0` | c2 | 1 |
-| 26 | `for i in range(1, len(arreglo)):` | c3 | n (n − 1 vueltas y la salida) |
-| 27 | `clave = arreglo[i]` | c4 | n − 1 |
-| 28 | `j = i - 1` | c5 | n − 1 |
-| 33 | `while j >= 0:` | c6 | como máximo Σ (t_i + 1) |
-| 34 | `comparaciones += 1` | c7 | Σ t_i |
-| 35 | `if arreglo[j] < clave:` | c8 | Σ t_i |
-| 38 | `arreglo[j + 1] = arreglo[j]` | c9 | Σ d_i |
-| 39 | `j -= 1` | c10 | Σ d_i |
-| 42 | `break` | c11 | como máximo n − 1 |
-| 44 | `arreglo[j + 1] = clave` | c12 | n − 1 |
-| 46 | `return arreglo, comparaciones` | c13 | 1 |
-
-Las sumas van de i = 1 a n − 1. Al sumar todo queda:
+Tomo la función `insertion_sort` de [algoritmos.py](algoritmos.py). Llamo t_i a las veces que se repite el `while` en la iteración i, o sea, las comparaciones que hace ese elemento. Y llamo C al total de comparaciones de toddo el ordenamiento:
 
 ```
-T(n) = c1·n + (c3 + c4 + c5 + c11 + c12)·(n − 1) + (c6 + c7 + c8)·Σ t_i + (c9 + c10)·Σ d_i + constantes
+C = t_1 + t_2 + ... + t_(n−1)
 ```
 
-Todo depende de cuánto vale Σ t_i, y eso cambia según cómo llegue la entrada:
+| Código | Veces que se ejecuta |
+|---|---|
+| `arreglo = list(datos)`, `comparaciones = 0` | 1 |
+| `for i in range(1, len(arreglo)):` | n − 1 |
+| `clave = arreglo[i]`, `j = i - 1` | n − 1 |
+| cuerpo del `while` (comparar y correr el elemento) | C |
+| `arreglo[j + 1] = clave` | n − 1 |
+| `return arreglo, comparaciones` | 1 |
 
-- Mejor caso, lista que ya viene de mayor a menor: la primera comparación de cada iteración ya falla, así que t_i = 1 y d_i = 0. Entonces Σ t_i = n − 1 y T(n) = a·n + b, que es lineal: Θ(n). Esto coincide con el chequeo de n − 1 comparaciones que hace el script.
-- Peor caso, lista de menor a mayor (escenario C): la clave es mayor que todo lo que tiene a la izquierda y recorre la parte ordenada completa, t_i = i y d_i = i:
+Cada línea cuesta una constante, así que al sumar todo queda:
+
+```
+T(n) = a·(n − 1) + b·C + constante
+```
+
+Todo depende de cuánto vale C, y eso cambia según cómo llegue la entrada:
+
+- Mejor caso, lista que ya viene de mayor a menor: la primera comparación de cada iteración ya falla, así que t_i = 1. Entonces C = n − 1 y T(n) = a·n + b, que es lineal: Θ(n). Esto coincide con el chequeo de n − 1 comparaciones que hace el script.
+- Peor caso, lista de menor a mayor (escenario C): la clave es mayor que todo lo que tiene a la izquierda y recorre la parte ordenada completa, t_i = i:
 
   ```
-  Σ t_i = 1 + 2 + ... + (n − 1) = n(n − 1) / 2
+  C = 1 + 2 + ... + (n − 1) = n(n − 1) / 2
   ```
 
   Entonces T(n) = a·n² + b·n + c, una cuadrática: Θ(n²). Con n = 6.400 la fórmula da 20.476.800, lo mismo que contó el escenario C.
-- Caso promedio, orden aleatorio (escenario A): en promedio la clave supera a la mitad de los elementos que tiene a la izquierda, t_i ~ i/2 y Σ t_i ~ n²/4. Sigue siendo Θ(n²), con la mitad de la constante del peor caso. Para n = 6.400 da 10.240.000 y conté 10.219.735.
+- Caso promedio, orden aleatorio (escenario A): en promedio la clave supera a la mitad de los elementos que tiene a la izquierda, t_i ~ i/2 y C ~ n²/4. Sigue siendo Θ(n²), con la mitad de la constante del peor caso. Para n = 6.400 da 10.240.000 y conté 10.219.735.
 
 #### Tabla de complejidades
 
